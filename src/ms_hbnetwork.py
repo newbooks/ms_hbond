@@ -188,8 +188,8 @@ def compute_hbnetwork(input_file, implementation):
                 count_line = next(f)
                 this_ms_count = int(count_line.split(",")[1].strip()) 
                 this_ms = np.array(ms_ini, dtype=int)
-                full_ms = np.concatenate((this_ms, fixed_confs))  # Append fixed conformers
-                implementation.process_microstate(full_ms, this_ms_count)
+                this_ms = np.concatenate((this_ms, fixed_confs))  # Update this ms to append fixed conformers
+                implementation.process_microstate(this_ms, this_ms_count)
                 line_counter = 1
                 # Compute hydrogen bond network for this microstate using hb_matrix
                 # Placeholder for actual hydrogen bond network computation
