@@ -84,8 +84,7 @@ class MatrixImplementation:
                 count = self.hb_count[d_idx, a_idx]
                 donor_confid = self.confids[d_idx]
                 acceptor_confid = self.confids[a_idx]
-                f.write(f"{donor_confid}\t{acceptor_confid}\t{count}\n")    
-        
+                f.write(f"{donor_confid}\t{acceptor_confid}\t{count}\n")
         logging.info(f"Dumping hydrogen bond count matrix to {fname}.")
         
 
