@@ -206,6 +206,5 @@ if __name__ == "__main__":
         implementation = AdjNumba_Implementation()
     else:
         raise ValueError(f"Unknown method: {method}")
-        sys.exit(1)
 
     compute_hbnetwork(input_file, implementation)
