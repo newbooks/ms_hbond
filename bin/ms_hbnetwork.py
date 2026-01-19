@@ -18,7 +18,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def read_head3_lst(filename):
+def read_head3_lst(filename="head3.lst"):
     confids = []
     confid_to_index = {}
     with open(filename, 'r') as f:
@@ -32,9 +32,9 @@ def read_head3_lst(filename):
     return confids, confid_to_index
 
 
-def dornor_acceptor_list():
+def dornor_acceptor_list(fname="step2_out_hah.txt"):
     da = []
-    with open("step2_out_hah.txt", 'r') as f:
+    with open(fname, 'r') as f:
         next(f)  # Skip header line
         for line in f:
             parts = line.split()
@@ -45,10 +45,14 @@ def dornor_acceptor_list():
 
 def compute_hbnetwork_matrix(input_file):
     # Read head3.lst to get confids and mapping
-    confids, confid_to_index = read_head3_lst("head3.lst")
+    fname = "head3.lst"
+    logging.info(f"Reading {fname} for conformer IDs.")
+    confids, confid_to_index = read_head3_lst(fname)
 
     # Read hydrogen bond matrix from step2_out_hah.txt
-    da_list = dornor_acceptor_list()
+    fname = "step2_out_hah.txt"
+    logging.info(f"Reading hydrogen bond donor-acceptor pairs from {fname}.")
+    da_list = dornor_acceptor_list(fname)
 
     # Initialize hydrogen bond lookup matrix, hb_matrix
     n_confs = len(confids)
