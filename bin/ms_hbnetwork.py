@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import argparse
 import numpy as np
 import numba as nb
@@ -32,7 +33,7 @@ def read_head3_lst(filename="head3.lst"):
     return confids, confid_to_index
 
 
-def dornor_acceptor_list(fname="step2_out_hah.txt"):
+def donor_acceptor_list(fname="step2_out_hah.txt"):
     da = []
     with open(fname, 'r') as f:
         next(f)  # Skip header line
@@ -52,17 +53,19 @@ def compute_hbnetwork_matrix(input_file):
     # Read hydrogen bond matrix from step2_out_hah.txt
     fname = "step2_out_hah.txt"
     logging.info(f"Reading hydrogen bond donor-acceptor pairs from {fname}.")
-    da_list = dornor_acceptor_list(fname)
+    da_list = donor_acceptor_list(fname)
 
     # Initialize hydrogen bond lookup matrix, hb_matrix
     logging.info("Initializing hydrogen bond lookup matrix.")
     n_confs = len(confids)
     hb_matrix = np.zeros((n_confs, n_confs), dtype=bool)
     for donor_confid, acceptor_confid in da_list:
-        if donor_confid in confid_to_index and acceptor_confid in confid_to_index:   # This filters BK confids
+        try:
             donor_index = confid_to_index[donor_confid]
             acceptor_index = confid_to_index[acceptor_confid]
             hb_matrix[donor_index, acceptor_index] = True
+        except KeyError:
+            pass
 
     # Read microstate data from input_file
     logging.info(f"Reading microstate data from {input_file}, processing the microstate header.")
@@ -106,7 +109,7 @@ def compute_hbnetwork_matrix(input_file):
         )
         if len(free_residue_confs) != n_free_residues:
             logging.warning("Number of free residues does not match the expected count.")
-            exit(1)
+            sys.exit(1)
         
         # Compose a reverse lookup: conformer index -> microstate index (free residue list)
         free_confs = [int(conf) for residue_confs in free_residue_confs for conf in residue_confs]
@@ -126,9 +129,11 @@ def compute_hbnetwork_matrix(input_file):
         # Now process each microstate line
         Continue_reading = True
         while Continue_reading:
-            line = next(f, None)
             # Look for pattern "MC:0", "MC:1", etc.
             iter_flag = False
+            line = next(f, None)
+            if line is None:
+                break
             if not line.startswith("MC:"):
                 continue
             else:
