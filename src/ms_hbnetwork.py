@@ -56,7 +56,6 @@ class MatrixImplementation:
         logging.info("Initializing hydrogen bond lookup matrix.")
         n_confs = len(self.confids)
         hb_matrix = np.zeros((n_confs, n_confs), dtype=bool)
-        self.hb_count = np.zeros((n_confs, n_confs), dtype=int)
         for donor_confid, acceptor_confid in self.da_list:
             try:
                 donor_index = self.confid_to_index[donor_confid]
