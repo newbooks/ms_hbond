@@ -44,11 +44,12 @@ def donor_acceptor_list(fname="step2_out_hah.txt"):
     return da
 
 
-class Matrix_Implementation:
+class MatrixImplementation:
     def __init__(self):
         self.confids, self.confid_to_index = read_head3_lst("head3.lst")
         self.da_list = donor_acceptor_list("step2_out_hah.txt")
         self.hb_matrix = self._initialize_hb_matrix()
+        self.hb_count = np.zeros((len(self.confids), len(self.confids)), dtype=int)  # n_confs x n_confs, donor on rows, acceptor on columns
 
     def _initialize_hb_matrix(self):
         # Initialize hydrogen bond lookup matrix, hb_matrix
@@ -64,14 +65,37 @@ class Matrix_Implementation:
                 pass
         return hb_matrix
 
+    def process_microstate(self, microstate, count):
+        # Compute hydrogen bond network for the given microstate using hb_matrix
+        reduced_matrix = self.hb_matrix[np.ix_(microstate, microstate)]
+        d, a = np.nonzero(reduced_matrix)
+        np.add.at(
+            self.hb_count,
+            (microstate[d], microstate[a]),
+            count
+        )
 
-class Adj_Implementation:
+    def dump_hb_count(self, fname="hbnetwork_count.txt"):
+        # Dump the hydrogen bond count matrix to a text file
+        donor_idxs, acceptor_idxs = np.nonzero(self.hb_count)
+        with open(fname, 'w') as f:
+            f.write("Donor_ConfID\tAcceptor_ConfID\tCount\n")
+            for d_idx, a_idx in zip(donor_idxs, acceptor_idxs):
+                count = self.hb_count[d_idx, a_idx]
+                donor_confid = self.confids[d_idx]
+                acceptor_confid = self.confids[a_idx]
+                f.write(f"{donor_confid}\t{acceptor_confid}\t{count}\n")
+        logging.info(f"Dumping hydrogen bond count matrix to {fname}.")
+        
+
+
+class AdjImplementation:
     def __init__(self):
         pass
     # Placeholder for adjacency list implementation
 
 
-class AdjNumba_Implementation:
+class AdjNumbaImplementation:
     def __init__(self):
         pass
     # Placeholder for numba-optimized adjacency list implementation
@@ -96,7 +120,7 @@ def compute_hbnetwork(input_file, implementation):
         line = next(f)
         parts = line.strip().split(":")
         n_fixed_confs = int(parts[0]) 
-        fixed_confs = np.array(parts[1].split())  # Ignore "Fixed_conformers:" label
+        fixed_confs = np.array([int(conf) for conf in parts[1].split()])  # Ignore "Fixed_conformers:" label
         logging.info(f"Detected {len(fixed_confs)} fixed occupied conformers, expected {n_fixed_confs}.")
         if len(fixed_confs) != n_fixed_confs:
             logging.warning("Number of fixed conformers does not match the expected count.")
@@ -111,7 +135,7 @@ def compute_hbnetwork(input_file, implementation):
         n_free_residues = int(parts[0])
         free_residue_confs_str = parts[1].split(";")  # Ignore "Free_conformers:" label
         free_residue_confs = [
-            residue_str.strip().split()
+            [int(conf) for conf in residue_str.strip().split()]
             for residue_str in free_residue_confs_str
             if residue_str.strip().split()
         ]
@@ -123,7 +147,7 @@ def compute_hbnetwork(input_file, implementation):
             sys.exit(1)
         
         # Compose a reverse lookup: conformer index -> microstate index (free residue list)
-        free_confs = [int(conf) for residue_confs in free_residue_confs for conf in residue_confs]
+        free_confs = np.array([int(conf) for residue_confs in free_residue_confs for conf in residue_confs])
         max_conf = max(free_confs)
         iconf_to_microstate_index = [-1] * (max_conf + 1)
         for microstate_index, residue_confs in enumerate(free_residue_confs):
@@ -161,6 +185,8 @@ def compute_hbnetwork(input_file, implementation):
                 count_line = next(f)
                 this_ms_count = int(count_line.split(",")[1].strip()) 
                 this_ms = np.array(ms_ini, dtype=int)
+                full_ms = np.concatenate((this_ms, fixed_confs))  # Append fixed conformers
+                implementation.process_microstate(full_ms, this_ms_count)
                 line_counter = 1
                 # Compute hydrogen bond network for this microstate using hb_matrix
                 # Placeholder for actual hydrogen bond network computation
@@ -183,13 +209,17 @@ def compute_hbnetwork(input_file, implementation):
                     this_ms_count = int(parts[1])
                     flipped_confs = [int(a) for a in parts[2].split()]
                     for iconf in flipped_confs:
-                        this_ms[iconf_to_microstate_index[iconf]] = iconf
+                        this_ms[iconf_to_microstate_index[iconf]] = iconf   # this_ms is modified in place
+                    implementation.process_microstate(this_ms, this_ms_count)
                     line_counter += 1
 
                 logging.info(f"Processed {line_counter} lines for microstate group {MC_mark}.")
                 MC_mark = new_MC_mark if Continue_reading else None
 
 
+    # After processing all microstates, output the hydrogen bond network statistics
+    logging.info("Finished processing all microstates. Outputting hydrogen bond network statistics.")
+    implementation.dump_hb_count("hbnetwork_count.txt")
 
 
 
@@ -200,11 +230,11 @@ if __name__ == "__main__":
 
     if method == "matrix":
         logging.info("Using matrix method for hydrogen bond network computation.")
-        implementation = Matrix_Implementation()
+        implementation = MatrixImplementation()
     elif method == "adj":
-        implementation = Adj_Implementation()
+        implementation = AdjImplementation()
     elif method == "adjnumba":
-        implementation = AdjNumba_Implementation()
+        implementation = AdjNumbaImplementation()
     else:
         raise ValueError(f"Unknown method: {method}")
 
