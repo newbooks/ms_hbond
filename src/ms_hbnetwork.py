@@ -82,12 +82,12 @@ class MatrixImplementation:
         donor_idxs, acceptor_idxs = np.nonzero(self.hb_count)
         with open(fname, 'w') as f:
             f.write(f"# Matrix Implementation - Total microstate count: {self.total_ms_count}\n")
-            f.write("Donor_ConfID\tAcceptor_ConfID\tCount\n")
+            f.write("Donor_ConfID  Acceptor_ConfID  Count\n")
             for d_idx, a_idx in zip(donor_idxs, acceptor_idxs):
                 count = self.hb_count[d_idx, a_idx]
                 donor_confid = self.confids[d_idx]
                 acceptor_confid = self.confids[a_idx]
-                f.write(f"{donor_confid}\t{acceptor_confid}\t{count}\n")
+                f.write(f"{donor_confid}  {acceptor_confid}  {count}\n")
         logging.info(f"Dumping hydrogen bond count matrix to {fname}.")
         
 
