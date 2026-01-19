@@ -50,6 +50,7 @@ class MatrixImplementation:
         self.da_list = donor_acceptor_list("step2_out_hah.txt")
         self.hb_matrix = self._initialize_hb_matrix()
         self.hb_count = np.zeros((len(self.confids), len(self.confids)), dtype=int)  # n_confs x n_confs, donor on rows, acceptor on columns
+        self.total_ms_count = 0
 
     def _initialize_hb_matrix(self):
         # Initialize hydrogen bond lookup matrix, hb_matrix
@@ -74,11 +75,13 @@ class MatrixImplementation:
             (microstate[d], microstate[a]),
             count
         )
+        self.total_ms_count += count
 
     def dump_hb_count(self, fname="hbnetwork_count.txt"):
         # Dump the hydrogen bond count matrix to a text file
         donor_idxs, acceptor_idxs = np.nonzero(self.hb_count)
         with open(fname, 'w') as f:
+            f.write(f"# Matrix Implementation - Total microstate count: {self.total_ms_count}\n")
             f.write("Donor_ConfID\tAcceptor_ConfID\tCount\n")
             for d_idx, a_idx in zip(donor_idxs, acceptor_idxs):
                 count = self.hb_count[d_idx, a_idx]
