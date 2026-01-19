@@ -62,6 +62,7 @@ class Matrix_Implementation:
                 hb_matrix[donor_index, acceptor_index] = True
             except KeyError:
                 pass
+        return hb_matrix
 
 
 class Adj_Implementation:
