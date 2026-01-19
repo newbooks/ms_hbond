@@ -16,9 +16,9 @@ Adjacency list with Numba > Matrix implementation > Adjacency list
 ## Benchmark results
 
 | Implementation | 1/4 Size | 1/2 Size | Full Size |
-| Matrix | | | |
-| Adjacency | | | |
-| Adjacency + Numba | | | |
+| Matrix | TBD | TBD | TBD |
+| Adjacency | TBD | TBD | TBD |
+| Adjacency + Numba | TBD | TBD | TBD |
 
 
 
