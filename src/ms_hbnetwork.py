@@ -44,29 +44,39 @@ def donor_acceptor_list(fname="step2_out_hah.txt"):
     return da
 
 
-def compute_hbnetwork_matrix(input_file):
-    # Read head3.lst to get confids and mapping
-    fname = "head3.lst"
-    logging.info(f"Reading {fname} for conformer IDs.")
-    confids, confid_to_index = read_head3_lst(fname)
+class Matrix_Implementation:
+    def __init__(self):
+        self.confids, self.confid_to_index = read_head3_lst("head3.lst")
+        self.da_list = donor_acceptor_list("step2_out_hah.txt")
+        self.hb_matrix = self._initialize_hb_matrix()
 
-    # Read hydrogen bond matrix from step2_out_hah.txt
-    fname = "step2_out_hah.txt"
-    logging.info(f"Reading hydrogen bond donor-acceptor pairs from {fname}.")
-    da_list = donor_acceptor_list(fname)
+    def _initialize_hb_matrix(self):
+        # Initialize hydrogen bond lookup matrix, hb_matrix
+        logging.info("Initializing hydrogen bond lookup matrix.")
+        n_confs = len(self.confids)
+        hb_matrix = np.zeros((n_confs, n_confs), dtype=bool)
+        for donor_confid, acceptor_confid in self.da_list:
+            try:
+                donor_index = self.confid_to_index[donor_confid]
+                acceptor_index = self.confid_to_index[acceptor_confid]
+                hb_matrix[donor_index, acceptor_index] = True
+            except KeyError:
+                pass
 
-    # Initialize hydrogen bond lookup matrix, hb_matrix
-    logging.info("Initializing hydrogen bond lookup matrix.")
-    n_confs = len(confids)
-    hb_matrix = np.zeros((n_confs, n_confs), dtype=bool)
-    for donor_confid, acceptor_confid in da_list:
-        try:
-            donor_index = confid_to_index[donor_confid]
-            acceptor_index = confid_to_index[acceptor_confid]
-            hb_matrix[donor_index, acceptor_index] = True
-        except KeyError:
-            pass
 
+class Adj_Implementation:
+    def __init__(self):
+        pass
+    # Placeholder for adjacency list implementation
+
+
+class AdjNumba_Implementation:
+    def __init__(self):
+        pass
+    # Placeholder for numba-optimized adjacency list implementation
+
+
+def compute_hbnetwork(input_file, implementation):
     # Read microstate data from input_file
     logging.info(f"Reading microstate data from {input_file}, processing the microstate header.")
     with open(input_file, 'r') as f:
@@ -182,32 +192,6 @@ def compute_hbnetwork_matrix(input_file):
 
 
 
-def compute_hbnetwork_adj(input_file):
-    confids, confid_to_index = read_head3_lst("head3.lst")
-    n_confs = len(confids)
-    hb_adj_list = {confid: [] for confid in confids}
-
-    # Placeholder for actual hydrogen bond computation logic
-    # Fill hb_adj_list based on hydrogen bond interactions
-
-    print("Hydrogen Bond Network Adjacency List:")
-    for confid, neighbors in hb_adj_list.items():
-        print(f"{confid}: {neighbors}")
-
-
-def compute_hbnetwork_adj_numba(input_file):
-    confids, confid_to_index = read_head3_lst("head3.lst")
-    n_confs = len(confids)
-    hb_adj_list = {confid: [] for confid in confids}
-
-    # Placeholder for actual hydrogen bond computation logic using Numba
-    # Fill hb_adj_list based on hydrogen bond interactions
-
-    print("Hydrogen Bond Network Adjacency List (Numba):")
-    for confid, neighbors in hb_adj_list.items():
-        print(f"{confid}: {neighbors}")
-
-
 if __name__ == "__main__":
     args = parse_arguments()
     input_file = args.file
@@ -215,10 +199,13 @@ if __name__ == "__main__":
 
     if method == "matrix":
         logging.info("Using matrix method for hydrogen bond network computation.")
-        compute_hbnetwork_matrix(input_file)
+        implementation = Matrix_Implementation()
     elif method == "adj":
-        compute_hbnetwork_adj(input_file)
+        implementation = Adj_Implementation()
     elif method == "adjnumba":
-        compute_hbnetwork_adj_numba(input_file)
+        implementation = AdjNumba_Implementation()
     else:
         raise ValueError(f"Unknown method: {method}")
+        sys.exit(1)
+
+    compute_hbnetwork(input_file, implementation)
