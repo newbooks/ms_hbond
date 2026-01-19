@@ -55,6 +55,7 @@ def compute_hbnetwork_matrix(input_file):
     da_list = dornor_acceptor_list(fname)
 
     # Initialize hydrogen bond lookup matrix, hb_matrix
+    logging.info("Initializing hydrogen bond lookup matrix.")
     n_confs = len(confids)
     hb_matrix = np.zeros((n_confs, n_confs), dtype=bool)
     for donor_confid, acceptor_confid in da_list:
