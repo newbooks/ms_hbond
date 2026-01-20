@@ -16,6 +16,9 @@ if __name__ == "__main__":
         with open(args.file) as f:
             first_line = f.readline()
         match = re.search(r"Total microstate count:\s*(\d+)", first_line)
+        if not match:
+            print(f"Error: Could not parse total microstate count from first line of file '{args.file}'.")
+            sys.exit(1)
         total_microstates = int(match.group(1))
         df = pd.read_csv(args.file, sep=r"\s+", comment="#")  # ignore comment lines
         # Get donor and acceptor pairs and their counts
