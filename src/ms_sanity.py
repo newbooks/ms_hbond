@@ -18,13 +18,13 @@ if __name__ == "__main__":
         match = re.search(r"Total microstate count:\s*(\d+)", first_line)
         total_microstates = int(match.group(1))
         df = pd.read_csv(args.file, sep=r"\s+", comment="#")  # ignore comment lines
-        # Get dornor and acceptor pairs and their counts
+        # Get donor and acceptor pairs and their counts
         donor_acceptor_pairs = df[["Donor_ConfID", "Acceptor_ConfID"]].values
         counts = df["Count"].values
         fractions = counts / total_microstates
     elif args.file.endswith(".csv"):
         df = pd.read_csv(args.file)
-        # Get dornor and acceptor pairs and their counts
+        # Get donor and acceptor pairs and their counts
         donor_acceptor_pairs = df[["donor", "acceptor"]].values
         fractions = df["ms_occ"].values
     else:
