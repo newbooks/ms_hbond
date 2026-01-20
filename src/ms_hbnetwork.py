@@ -178,6 +178,8 @@ class AdjImplementationNumba:
                 a = self.confid_to_index[acceptor_confid]
                 tmp_adj[d].add(a)
             except KeyError:
+                # Some donor/acceptor conformer IDs from the DA list are not present
+                # in head3.lst; skip those pairs when building the adjacency.
                 pass
 
         indptr = np.zeros(self.n_confs + 1, dtype=np.int32)
