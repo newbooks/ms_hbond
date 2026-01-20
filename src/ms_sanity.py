@@ -57,7 +57,7 @@ if __name__ == "__main__":
     df_fort38 = pd.read_csv(fname_fort38, sep=r"\s+")
     fort38_dict = {}
     for _, row in df_fort38.iterrows():
-        confid = row["ph"]
+        confid = row[df_fort38.columns[0]]
         frac = row[f"{float(args.p):.1f}"]
         fort38_dict[confid] = frac
     for (d, a), frac in zip(donor_acceptor_pairs, fractions):
