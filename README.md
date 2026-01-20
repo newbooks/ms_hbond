@@ -27,5 +27,9 @@ Adjacency list with Numba > Matrix implementation > Adjacency list
 | Adjacency | 19s | 1m16s | 25m5s |
 | Numba | 4s | 6s | 44s |
 
+**Conclusion:**
 
+Performance: Numba > Adjacecy list > matrix
+
+Scaling: Numba > Adjacecy list > matrix
 
