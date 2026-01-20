@@ -3,7 +3,7 @@
 import sys
 import argparse
 import numpy as np
-import numba as nb
+from numba import njit
 import logging
 from collections import defaultdict
 
@@ -16,7 +16,7 @@ logging.basicConfig(
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Compute hydrogen bond network statistics from mcce.")
-    parser.add_argument("-i", choices=["matrix", "adj", "adjnumba"], default="matrix", help="Implementation method for hydrogen bond network computation")
+    parser.add_argument("-i", choices=["matrix", "adj", "numba"], default="matrix", help="Implementation method for hydrogen bond network computation")
     parser.add_argument("file", help="Input file name for microstates")
     return parser.parse_args()
 
@@ -131,10 +131,106 @@ class AdjImplementation:
         logging.info(f"Dumped hydrogen bond count adjacency list to {fname}.")
 
 
-class AdjNumbaImplementation:
+@njit
+def _process_microstate_numba(
+    microstate,
+    count,
+    hb_adj_indices,
+    hb_adj_indptr,
+    ms_mask,
+    hb_count,
+):
+    for i in range(len(microstate)):
+        d = microstate[i]
+        start = hb_adj_indptr[d]
+        end = hb_adj_indptr[d + 1]
+
+        for p in range(start, end):
+            a = hb_adj_indices[p]
+            if ms_mask[a]:
+                hb_count[d, a] += count
+
+
+class AdjImplementationNumba:
     def __init__(self):
-        pass
-    # Placeholder for numba-optimized adjacency list implementation
+        self.confids, self.confid_to_index = read_head3_lst("head3.lst")
+        self.da_list = donor_acceptor_list("step2_out_hah.txt")
+
+        self.n_confs = len(self.confids)
+
+        # Build adjacency in CSR-like format
+        self.hb_adj_indices, self.hb_adj_indptr = self._build_csr_adjacency()
+
+        # Dense count matrix (Numba-friendly)
+        self.hb_count = np.zeros((self.n_confs, self.n_confs), dtype=np.int64)
+
+        self.total_ms_count = 0
+
+    def _build_csr_adjacency(self):
+        """
+        Convert donor->acceptor adjacency list into CSR-like arrays
+        """
+        tmp_adj = defaultdict(set)
+
+        for donor_confid, acceptor_confid in self.da_list:
+            try:
+                d = self.confid_to_index[donor_confid]
+                a = self.confid_to_index[acceptor_confid]
+                tmp_adj[d].add(a)
+            except KeyError:
+                pass
+
+        indptr = np.zeros(self.n_confs + 1, dtype=np.int32)
+        indices = []
+
+        for d in range(self.n_confs):
+            neighbors = tmp_adj.get(d, ())
+            indptr[d + 1] = indptr[d] + len(neighbors)
+            indices.extend(neighbors)
+
+        return np.array(indices, dtype=np.int32), indptr
+
+    def process_microstate(self, microstate, count):
+        """
+        Drop-in replacement for your original method
+        """
+        microstate = np.asarray(microstate, dtype=np.int32)
+
+        # Boolean membership mask
+        ms_mask = np.zeros(self.n_confs, dtype=np.uint8)
+        ms_mask[microstate] = 1
+
+        _process_microstate_numba(
+            microstate,
+            count,
+            self.hb_adj_indices,
+            self.hb_adj_indptr,
+            ms_mask,
+            self.hb_count,
+        )
+
+        self.total_ms_count += count
+
+    def dump_hb_count(self, fname="hbnetwork_count.txt"):
+        """
+        Same output format as before
+        """
+        with open(fname, "w") as f:
+            f.write(
+                f"# Adjacency+Numba Implementation - Total microstate count: "
+                f"{self.total_ms_count}\n"
+            )
+            f.write("Donor_ConfID  Acceptor_ConfID  Count\n")
+
+            donor_idxs, acceptor_idxs = np.nonzero(self.hb_count)
+            for d, a in zip(donor_idxs, acceptor_idxs):
+                f.write(
+                    f"{self.confids[d]}  "
+                    f"{self.confids[a]}  "
+                    f"{self.hb_count[d, a]}\n"
+                )
+
+        logging.info(f"Dumped hydrogen bond count matrix to {fname}.")
 
 
 def compute_hbnetwork(input_file, implementation):
@@ -266,8 +362,8 @@ if __name__ == "__main__":
         implementation = MatrixImplementation()
     elif method == "adj":
         implementation = AdjImplementation()
-    elif method == "adjnumba":
-        implementation = AdjNumbaImplementation()
+    elif method == "numba":
+        implementation = AdjImplementationNumba()
     else:
         raise ValueError(f"Unknown method: {method}")
 
