@@ -23,13 +23,13 @@ Adjacency list with Numba > Matrix implementation > Adjacency list
 
 | Implementation | 4lzt | Jose 30m | Jose unfinished |
 |---|---|---|---|
-| Matrix | 51s | 9m | TBD |
+| Matrix | 51s | 9m | > 8h |
 | Adjacency | 19s | 1m16s | 25m5s |
 | Numba | 4s | 6s | 44s |
 
-**Conclusion:**
+## Conclusion
 
-Performance: Numba > Adjacecy list > matrix
+**Performance:** Numba implementation significantly outperforms both adjacency list and matrix approaches across all datasets.
 
-Scaling: Numba > Adjacecy list > matrix
+**Scalability:** Numba demonstrates superior scalability, followed by the adjacency list approach, with the matrix implementation showing the steepest performance degradation as dataset size increases.
 
