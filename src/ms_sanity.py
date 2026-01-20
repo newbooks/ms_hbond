@@ -61,6 +61,8 @@ if __name__ == "__main__":
         frac = row[f"{float(args.p):.1f}"]
         fort38_dict[confid] = frac
     for (d, a), frac in zip(donor_acceptor_pairs, fractions):
+        if (str(d), str(a)) not in hbond_pairs:
+            continue
         d_frac = fort38_dict.get(d, None)
         a_frac = fort38_dict.get(a, None)
         occ_max = min(d_frac, a_frac)
@@ -76,4 +78,3 @@ if __name__ == "__main__":
         print("Sanity check passed: All donor-acceptor pairs are valid and occupancies are within bounds.")
     else:
         print("Sanity check failed: Issues found with donor-acceptor pairs or occupancies. Either the hbonding network or fort.38 file may be incorrect.")
-        
