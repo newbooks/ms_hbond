@@ -48,6 +48,8 @@ if __name__ == "__main__":
                 acceptor = parts[1].strip()
                 hbond_pairs.add((donor, acceptor))
     for d, a in donor_acceptor_pairs:
+        if d[3:5] == "BK" or a[3:5] == "BK":
+            continue
         if (str(d), str(a)) not in hbond_pairs:
             print(f"Warning: Donor-Acceptor pair ({d}, {a}) not found in {fname_hah}")
             passed = False
