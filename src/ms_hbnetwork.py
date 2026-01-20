@@ -16,7 +16,7 @@ logging.basicConfig(
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Compute hydrogen bond network statistics from mcce.")
-    parser.add_argument("-i", choices=["matrix", "adj", "numba"], default="matrix", help="Implementation method for hydrogen bond network computation")
+    parser.add_argument("-i", choices=["matrix", "adj", "numba"], default="numba", help="Implementation method for hydrogen bond network computation")
     parser.add_argument("file", help="Input file name for microstates")
     return parser.parse_args()
 
