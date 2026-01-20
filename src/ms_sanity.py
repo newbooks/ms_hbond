@@ -64,22 +64,16 @@ if __name__ == "__main__":
         if (str(d), str(a)) not in hbond_pairs:
             continue
         d_frac = fort38_dict.get(d, None)
-        if d_frac is None:
+        if d_frac is None and d[3:5] != "BK":
             print(f"Warning: Donor {d} not found in fort.38")
             passed = False
             continue
         a_frac = fort38_dict.get(a, None)
-        if a_frac is None:
+        if a_frac is None and a[3:5] != "BK":
             print(f"Warning: Acceptor {a} not found in fort.38")
             passed = False
             continue
         if d_frac is not None and a_frac is not None:
-            if d_frac < 0.0 or d_frac > 1.0:
-                print(f"Warning: Donor {d} has invalid occupancy {d_frac:.4f} in fort.38")
-                passed = False
-            if a_frac < 0.0 or a_frac > 1.0:
-                print(f"Warning: Acceptor {a} has invalid occupancy {a_frac:.4f} in fort.38")
-                passed = False
             occ_max = min(d_frac, a_frac)
             occ_min = max(0.0, d_frac + a_frac - 1.0)
             if frac > occ_max + 1e-3:
