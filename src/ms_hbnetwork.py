@@ -186,7 +186,7 @@ class AdjImplementationNumba:
         for d in range(self.n_confs):
             neighbors = tmp_adj.get(d, ())
             indptr[d + 1] = indptr[d] + len(neighbors)
-            indices.extend(neighbors)
+            indices.extend(sorted(neighbors))
 
         return np.array(indices, dtype=np.int32), indptr
 
