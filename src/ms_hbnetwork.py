@@ -5,6 +5,8 @@ import argparse
 import numpy as np
 import numba as nb
 import logging
+from collections import defaultdict
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -91,11 +93,42 @@ class MatrixImplementation:
         logging.info(f"Dumped hydrogen bond count matrix to {fname}.")
         
 
-
 class AdjImplementation:
     def __init__(self):
-        pass
-    # Placeholder for adjacency list implementation
+        self.confids, self.confid_to_index = read_head3_lst("head3.lst")
+        self.da_list = donor_acceptor_list("step2_out_hah.txt")
+        self.hb_adj = self._initialize_hb_adjacency()
+        self.hb_count = defaultdict(int)  # (donor_idx, acceptor_idx) -> count
+        self.total_ms_count = 0
+
+    def _initialize_hb_adjacency(self):
+        hb_adj = defaultdict(set)  # donor_idx -> set of acceptor_idx
+        for donor_confid, acceptor_confid in self.da_list:
+            try:
+                d = self.confid_to_index[donor_confid]
+                a = self.confid_to_index[acceptor_confid]
+                hb_adj[d].add(a)
+            except KeyError:
+                pass
+        return hb_adj
+    
+    def process_microstate(self, microstate, count):
+        microstate_set = set(microstate)
+        for d in microstate:
+            for a in self.hb_adj.get(d, []):
+                if a in microstate_set:
+                    self.hb_count[(d, a)] += count
+        self.total_ms_count += count
+
+    def dump_hb_count(self, fname="hbnetwork_count.txt"):
+        with open(fname, 'w') as f:
+            f.write(f"# Adjacency List Implementation - Total microstate count: {self.total_ms_count}\n")
+            f.write("Donor_ConfID  Acceptor_ConfID  Count\n")
+            for (d_idx, a_idx), count in self.hb_count.items():
+                donor_confid = self.confids[d_idx]
+                acceptor_confid = self.confids[a_idx]
+                f.write(f"{donor_confid}  {acceptor_confid}  {count}\n")
+        logging.info(f"Dumped hydrogen bond count adjacency list to {fname}.")
 
 
 class AdjNumbaImplementation:
