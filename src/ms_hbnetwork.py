@@ -88,7 +88,7 @@ class MatrixImplementation:
                 donor_confid = self.confids[d_idx]
                 acceptor_confid = self.confids[a_idx]
                 f.write(f"{donor_confid}  {acceptor_confid}  {count}\n")
-        logging.info(f"Dumping hydrogen bond count matrix to {fname}.")
+        logging.info(f"Dumped hydrogen bond count matrix to {fname}.")
         
 
 
@@ -161,9 +161,6 @@ def compute_hbnetwork(input_file, implementation):
         #------------------------------------------------------------------------------------------------
         # Congratulations, we have parsed the microstate header and have all the data structures we need
         #------------------------------------------------------------------------------------------------
-        logging.info("Finished parsing microstate header.")
-
-
         # Now process each microstate line
         Continue_reading = True
         while Continue_reading:
