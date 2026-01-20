@@ -13,7 +13,7 @@ Implementations under evaluation:
 
 - **Matrix approach**: Hydrogen bond networks are stored as a lookup matrix. For each microstate, the matrix is reduced and NumPy vectorized operations are used to identify hydrogen bonds. The counter is also matrix-based.
 - **Adjacency list**: Hydrogen bond networks are stored as an adjacency list. Since hydrogen bonds among conformers are sparse, this approach reduces unnecessary operations and saves computation time. The counter is a Python dictionary.
-- **Adjacency list with Numba**: Adjacency list operations involve loops and lose the advantage of NumPy vectorization. Numba introduces C-level efficiency to recover performance. The counter is a Numba typed dictionary.
+- **Adjacency list with Numba**: Adjacency list operations involve loops and lose the advantage of NumPy vectorization. Numba introduces C-level efficiency to recover performance. The counter is a dense matrix used in matrix implementation for the best performance.
 
 ## Hypothesis:
 
