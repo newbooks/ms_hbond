@@ -234,7 +234,7 @@ class AdjImplementationNumba:
                     f"{self.hb_count[d, a]}\n"
                 )
 
-        logging.info(f"Dumped hydrogen bond count matrix to {fname}.")
+        logging.info(f"Dumped hydrogen bond count adjacency list (Numba) to {fname}.")
 
 
 def compute_hbnetwork(input_file, implementation):
