@@ -79,10 +79,10 @@ if __name__ == "__main__":
             occ_max = min(d_frac, a_frac)
             occ_min = max(0.0, d_frac + a_frac - 1.0)
             if frac > occ_max + 1e-3:
-                print(f"Warning: Occupancy {frac:.4f} for pair ({d}, {a}) exceeds max bound {occ_max:.3f} obtained from {d_frac:.3f} (donor) and {a_frac:.3f} (acceptor)")
+                print(f"Warning: Occ {frac:.4f} exceeds max bound {occ_max:.3f} obtained from {d_frac:.3f} ({d}) and {a_frac:.3f} ({a})")
                 passed = False
             if frac < occ_min - 1e-3:
-                print(f"Warning: Occupancy {frac:.4f} for pair ({d}, {a}) below min bound {occ_min:.3f} obtained from {d_frac:.3f} (donor) and {a_frac:.3f} (acceptor)")
+                print(f"Warning: Occ {frac:.4f} below min bound {occ_min:.3f} obtained from {d_frac:.3f} ({d}) and {a_frac:.3f} ({a})")
                 passed = False
     
     if passed:
