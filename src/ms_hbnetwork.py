@@ -213,7 +213,11 @@ class AdjImplementationNumba:
 
     def dump_hb_count(self, fname="hbnetwork_count.txt"):
         """
-        Same output format as before
+        Write the hydrogen bond count matrix to a text file in a human-readable format.
+
+        The output file begins with a header line containing the total microstate
+        count, followed by tabular data with donor and acceptor conformer IDs
+        and their corresponding hydrogen bond counts.
         """
         with open(fname, "w") as f:
             f.write(
