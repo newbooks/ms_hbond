@@ -52,7 +52,7 @@ if __name__ == "__main__":
             print(f"Warning: Donor-Acceptor pair ({d}, {a}) not found in {fname_hah}")
             passed = False
 
-    # Check against fort.38 to see if the donor - acceptor occupany is within the bounds
+    # Check against fort.38 to see if the donor - acceptor occupancy is within the bounds
     fname_fort38 = "fort.38"
     df_fort38 = pd.read_csv(fname_fort38, sep=r"\s+")
     fort38_dict = {}
