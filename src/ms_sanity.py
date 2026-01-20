@@ -64,15 +64,30 @@ if __name__ == "__main__":
         if (str(d), str(a)) not in hbond_pairs:
             continue
         d_frac = fort38_dict.get(d, None)
+        if d_frac is None:
+            print(f"Warning: Donor {d} not found in fort.38")
+            passed = False
+            continue
         a_frac = fort38_dict.get(a, None)
-        occ_max = min(d_frac, a_frac)
-        occ_min = max(0.0, d_frac + a_frac - 1.0)
-        if frac > occ_max + 1e-3:
-            print(f"Warning: Occupancy {frac:.4f} for pair ({d}, {a}) exceeds max bound {occ_max:.3f} obtained from {d_frac:.3f} (donor) and {a_frac:.3f} (acceptor)")
+        if a_frac is None:
+            print(f"Warning: Acceptor {a} not found in fort.38")
             passed = False
-        if frac < occ_min - 1e-3:
-            print(f"Warning: Occupancy {frac:.4f} for pair ({d}, {a}) below min bound {occ_min:.3f} obtained from {d_frac:.3f} (donor) and {a_frac:.3f} (acceptor)")
-            passed = False
+            continue
+        if d_frac is not None and a_frac is not None:
+            if d_frac < 0.0 or d_frac > 1.0:
+                print(f"Warning: Donor {d} has invalid occupancy {d_frac:.4f} in fort.38")
+                passed = False
+            if a_frac < 0.0 or a_frac > 1.0:
+                print(f"Warning: Acceptor {a} has invalid occupancy {a_frac:.4f} in fort.38")
+                passed = False
+            occ_max = min(d_frac, a_frac)
+            occ_min = max(0.0, d_frac + a_frac - 1.0)
+            if frac > occ_max + 1e-3:
+                print(f"Warning: Occupancy {frac:.4f} for pair ({d}, {a}) exceeds max bound {occ_max:.3f} obtained from {d_frac:.3f} (donor) and {a_frac:.3f} (acceptor)")
+                passed = False
+            if frac < occ_min - 1e-3:
+                print(f"Warning: Occupancy {frac:.4f} for pair ({d}, {a}) below min bound {occ_min:.3f} obtained from {d_frac:.3f} (donor) and {a_frac:.3f} (acceptor)")
+                passed = False
     
     if passed:
         print("Sanity check passed: All donor-acceptor pairs are valid and occupancies are within bounds.")
