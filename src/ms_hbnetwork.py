@@ -192,7 +192,7 @@ class AdjImplementationNumba:
 
     def process_microstate(self, microstate, count):
         """
-        Drop-in replacement for your original method
+        Processes a single microstate and updates hydrogen bond counts.
         """
         microstate = np.asarray(microstate, dtype=np.int32)
 
