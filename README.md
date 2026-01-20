@@ -23,7 +23,7 @@ Adjacency list with Numba > Matrix implementation > Adjacency list
 
 | Implementation | 4lzt | Jose 30m | Jose unfinished |
 |---|---|---|---|
-| Matrix | 51s | 9m | > 8h |
+| Matrix | 51s | 9m | 10h1m |
 | Adjacency | 19s | 1m16s | 25m5s |
 | Numba | 4s | 6s | 44s |
 
