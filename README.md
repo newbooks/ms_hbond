@@ -1,5 +1,11 @@
 # ms_hbond
 
+## Additional requirement
+The fastest implementation uses Numba module. Please install numba by
+```
+pip install numba
+```  
+
 ## Goal
 Hydrogen bond detection in microstates is a critical tool in MCCE_tools. Given the current performance constraints, this project aims to explore different implementations of microstate hydrogen bond detection and benchmark the speed of various algorithms.
 
